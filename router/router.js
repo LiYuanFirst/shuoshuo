@@ -53,7 +53,7 @@ exports.doLogin = function(req,res,next){
                 }
                 res.json({"result":1});
             }
-            //1-ÃÜÂë´íÎó£¬0-³É¹¦£¬-1-ÓÃ»§²»´æÔÚ
+            //1-å¯†ç é”™è¯¯0-æˆåŠŸ-1-è´¦å·ä¸å­˜åœ¨
         });
     })
 }
@@ -84,64 +84,60 @@ exports.doRegister = function(req,res,next){
             }else{
                 res.json({"result":-1});
             }
-           //1-²åÈëÊı¾İ³ö´í£¬0-³É¹¦£¬-1-ÓÃ»§ÒÑ´æÔÚ
+           //1-æ’å…¥å‡ºé”™0-æˆåŠŸ-1-è´¦å·å·²å­˜åœ¨
         });
 
     });
 };
+//å›¾ç‰‡ä¸Šä¼ 
 exports.uploadImg = function (req,res,next) {
-    // ÎÄ¼ş½«ÒªÉÏ´«µ½ÄÄ¸öÎÄ¼ş¼ĞÏÂÃæ
-    var uploadfolderpath = __dirname.replace("router","public") + '/images';
+    //è®¾ç½®å›¾ç‰‡ä¸Šä¼ åœ°å€
+    var uploadfolderpath = __dirname.replace("router","public") + '/uploads';
 
-    // Ê¹ÓÃµÚÈı·½µÄ formidable ²å¼ş³õÊ¼»¯Ò»¸ö form ¶ÔÏó
     var form = new formidable.IncomingForm();
-    form.uploadDir=__dirname.replace("router","public") + '/images';
-    // wangEditor_uploadImg_assist.html Ò³ÃæµÄurlµØÖ·
-    var assitUrl = 'http://127.0.0.1:3000/editor';
+    //å›¾ç‰‡ä¸Šä¼ ä¸´æ—¶ç¼“å­˜åœ°å€
+    form.uploadDir=__dirname.replace("router","public") + '/uploads';
+    //è¿”å›å›¾ç‰‡åœ°å€è·¯å¾„
+    var assitUrl = 'http://127.0.0.1:3000/uploads';
 
     form.parse(req, function (err, fields, files) {
         if (err) {
             return console.log('formidable, form.parse err');
         }
-        console.log(files);
-        var file = files['code2.jpg'];
-        // formidable »á½«ÉÏ´«µÄÎÄ¼ş´æ´¢ÎªÒ»¸öÁÙÊ±ÎÄ¼ş£¬ÏÖÔÚ»ñÈ¡Õâ¸öÎÄ¼şµÄÄ¿Â¼
+        //å›¾ç‰‡ä¸Šä¼ name å¿…é¡»ä¸å‰å°ä¿æŒä¸€è‡´
+        var file = files['images'];
         var tempfilepath = file.path;
-        // »ñÈ¡ÎÄ¼şÀàĞÍ
         var type = file.type;
 
-        // »ñÈ¡ÎÄ¼şÃû£¬²¢¸ù¾İÎÄ¼şÃû»ñÈ¡À©Õ¹Ãû
         var filename = file.name;
+        //è·å–å›¾ç‰‡åç¼€å
         var extname = filename.lastIndexOf('.') >= 0
             ? filename.slice(filename.lastIndexOf('.') - filename.length)
             : '';
-        // ÎÄ¼şÃûÃ»ÓĞÀ©Õ¹ÃûÊ±ºò£¬Ôò´ÓÎÄ¼şÀàĞÍÖĞÈ¡À©Õ¹Ãû£¨ÈçÕ³ÌùÍ¼Æ¬Ê±£©
         if (extname === '' && type.indexOf('/') >= 0) {
             extname = '.' + type.split('/')[1];
         }
-        // ½«ÎÄ¼şÃûÖØĞÂ¸³ÖµÎªÒ»¸öËæ»úÊı£¨±ÜÃâÎÄ¼şÖØÃû£©
+        //é‡æ–°å®šä¹‰ä¸Šä¼ åå›¾ç‰‡åç§°
         filename = Math.random().toString().slice(2) + extname;
         console.log(filename);
-        // ¹¹½¨½«Òª´æ´¢µÄÎÄ¼şµÄÂ·¾¶
+
+        //å®šä¹‰å›¾ç‰‡å…¨è·¯å¾„
         var filenewpath = uploadfolderpath + '/' + filename;
 
-        // ½«ÁÙÊ±ÎÄ¼ş±£´æÎªÕıÊ½µÄÎÄ¼ş
+        //å°†ç¼“å­˜æ–‡ä»¶é‡å‘½åä¸ºæŒ‡å®šæ–‡ä»¶
+        fs.rename(tempfilepath, filenewpath, function (err) {
 
-        fs.renameSync(tempfilepath, filenewpath, function (err) {
-            // ´æ´¢½á¹û
-            var result = '';
-            var imgUrl = '';
 
             if (err) {
-                // ·¢Éú´íÎó
                 console.log(err);
-                result = assitUrl + '#ÉÏ´«Ê§°Ü';
-            } else {
-                // ±£´æ³É¹¦
-                console.log('fs.rename done');
-                // Æ´½ÓÍ¼Æ¬urlµØÖ·
-                imgUrl = 'http://localhost:' + port + '/' + uploadfoldername + '/' + filename;
-                result = assitUrl + '#ok|' + imgUrl;
+                res.json({"errno":1});
+            }else {
+                //é‡å‘½åæˆåŠŸååˆ é™¤åŸç¼“å­˜æ–‡ä»¶
+                fs.unlink(tempfilepath, function(err){
+                    var result = assitUrl + "/" + filename;
+                    res.json({"errno":0, data: [result]});
+                });
+
             }
 
 
