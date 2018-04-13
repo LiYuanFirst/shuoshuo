@@ -7,21 +7,63 @@ var db = require("../models/db.js");
 var path = require('path');
 var fs = require('fs');
 var util = require('util');
+var os=require('os'),
+    iptable={},
+    ifaces=os.networkInterfaces();
+for (var dev in ifaces) {
+    ifaces[dev].forEach(function(details,alias){
+        if (details.family=='IPv4') {
+            iptable[dev+(alias?':'+alias:'')]=details.address;
+        }
+    });
+}
+
+console.log(iptable);
+Date.prototype.Format = function (fmt) { //author: meizz
+    var o = {
+        "M+": this.getMonth() + 1, //月份
+        "d+": this.getDate(), //日
+        "h+": this.getHours(), //小时
+        "m+": this.getMinutes(), //分
+        "s+": this.getSeconds(), //秒
+        "q+": Math.floor((this.getMonth() + 3) / 3), //季度
+        "S": this.getMilliseconds() //毫秒
+    };
+    if (/(y+)/.test(fmt)) fmt = fmt.replace(RegExp.$1, (this.getFullYear() + "").substr(4 - RegExp.$1.length));
+    for (var k in o)
+        if (new RegExp("(" + k + ")").test(fmt)) fmt = fmt.replace(RegExp.$1, (RegExp.$1.length == 1) ? (o[k]) : (("00" + o[k]).substr(("" + o[k]).length)));
+    return fmt;
+}
+
+//首页地址
 exports.showIndex = function(req,res,next){
-    if(req.session.login){
-        res.render("index",{"login":true,"username":req.session.username});
-    }else{
-        res.render("index",{"login":false});
+
+    var page = req.query.page;
+    if(!page){
+        page = 0;
     }
+    db.getAllCount("liuyanben",function(result){
+        if(req.session.login){
+            console.log(result);
+            res.render("index",{"login":true,"username":req.session.username,"count":result,"page":page});
+        }else{
+            console.log(result);
+            res.render("index",{"login":false,"count":result,"page":page});
+        }
+    })
+
+
 
 
 }
+//登录页面
 exports.showLogin = function(req,res,next){
     res.render("login");
 }
 exports.showRegister = function(req,res,next){
     res.render("register");
 }
+//
 exports.showCenter = function(req,res,next){
     res.render("userCenter");
 }
@@ -29,7 +71,7 @@ exports.showEditor = function(req,res,next){
     if(req.session.login){
         res.render("editor",{"login":true,"username":req.session.username});
     }else{
-        res.render("editor",{"login":false});
+        res.render("login");
     }
 }
 
@@ -89,6 +131,57 @@ exports.doRegister = function(req,res,next){
 
     });
 };
+
+//获取文章列表
+exports.getArticle = function(req,res,next){
+    //获取文章
+    var form = new formidable.IncomingForm();
+    form.parse(req, function(err, fields) {
+        var page= fields.page;
+        if(page){
+            console.log(page);
+        }else{
+            console.log(0);
+            page = 0;
+        }
+        db.find("liuyanben",{},{"pageamount":3,"page":page},function(err,result){
+
+             res.send(result)
+        });
+    })
+
+};
+
+
+
+
+//文章上传
+exports.doUploadEditor = function(req,res,next){
+    var form = new formidable.IncomingForm();
+    form.parse(req, function(err, fields) {
+        console.log(fields.title);
+        var title = fields.title,
+            author = fields.authord,
+            brief = fields.brief,
+            content = fields.content;
+            db.insertOne("liuyanben",{
+                "title":title,
+                "author":author,
+                "brief": brief,
+                "content":content,
+                "time":(new Date()).Format("yyyy-M-d h:m:s")
+            }, function (err,result) {
+                if(err){
+                    res.json({"result":1});
+                    return;
+                }
+                res.json({"result":0});
+
+
+            })
+
+    });
+};
 //图片上传
 exports.uploadImg = function (req,res,next) {
     //设置图片上传地址
@@ -97,8 +190,10 @@ exports.uploadImg = function (req,res,next) {
     var form = new formidable.IncomingForm();
     //图片上传临时缓存地址
     form.uploadDir=__dirname.replace("router","public") + '/uploads';
+
+
     //返回图片地址路径
-    var assitUrl = 'http://127.0.0.1:3000/uploads';
+    var assitUrl = 'http://'+iptable["以太网:1"]+':3000/uploads';
 
     form.parse(req, function (err, fields, files) {
         if (err) {
@@ -143,6 +238,4 @@ exports.uploadImg = function (req,res,next) {
 
         });
     });
-
-
 }

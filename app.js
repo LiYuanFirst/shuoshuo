@@ -22,9 +22,11 @@ app.get("/login",router.showLogin);
 app.get("/register",router.showRegister);
 app.get("/userCenter",router.showCenter);
 app.get("/editor",router.showEditor);
+app.post("/getArticle",router.getArticle);
 
 
 app.post("/doLogin",router.doLogin);
 app.post("/doRegister",router.doRegister);
 app.post("/uploadImg",router.uploadImg);
+app.post("/doUploadEditor",router.doUploadEditor);
 app.listen(3000);

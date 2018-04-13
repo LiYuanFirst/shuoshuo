@@ -34,7 +34,7 @@
                 </ul>
                 <% if(login){ %>
                     <ul class="nav navbar-nav navbar-right">
-                        <li><a href="/#">欢迎你，<%= username %></a></li>
+                        <li><a href="/#">欢迎你，<span id="author"><%= username %></span></a></li>
                     </ul>
                 <% }else{ %>
                     <ul class="nav navbar-nav navbar-right">
@@ -48,6 +48,15 @@
         </div><!-- /.container-fluid -->
     </nav>
     <div class="container">
+        <div class="input-group input-group-lg" style="margin-bottom:16px;">
+          <span class="input-group-addon" id="sizing-addon1">标题</span>
+          <input type="text" class="form-control" placeholder="请输入标题" aria-describedby="sizing-addon1" id="editor-title">
+        </div>
+        <div class="input-group input-group-lg" style="margin-bottom:16px;">
+            <span class="input-group-addon" id="sizing-addon1">简介</span>
+            <textarea id="brief" class="form-control"  class="form-control" placeholder="请输入文章简介" rows="3" aria-describedby="sizing-addon1" style="height: 100px" ></textarea>
+        </div>
+
         <div id="editor">
 
         </div>
@@ -59,7 +68,7 @@
     </div>
 </body>
 <script src="//unpkg.com/wangeditor/release/wangEditor.min.js"></script>
+
 <script src="js/editor.js"></script>
-<script>
-</script>
+
 </html>

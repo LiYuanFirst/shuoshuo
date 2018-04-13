@@ -8,6 +8,7 @@
 
     <link href="css/bootstrap.min.css" rel="stylesheet">
     <script src="js/jquery.min.js"></script>
+    <script src="js/underscore.js"></script>
     <script src="js/bootstrap.min.js"></script>
 </head>
 <body>
@@ -46,21 +47,117 @@
             </div><!-- /.navbar-collapse -->
         </div><!-- /.container-fluid -->
     </nav>
+    <div class="container" id="articleList">
+
+    </div>
     <div class="container">
-        <div class="media">
-            <div class="media-left">
-                <a href="#">
-                    <img class="media-object" src="images/demo.svg" alt="...">
-                </a>
-            </div>
-            <div class="media-body">
-                <h4 class="media-heading">Media heading</h4>
-                文字内容简介文字内容简介
+        <nav aria-label="Page navigation">
+            <ul class="pager">
+                <li class="previous" ><a href=""><span aria-hidden="true">&larr;</span> 上一页</a></li>
+                <li class="next"><a href="">下一页 <span aria-hidden="true">&rarr;</span></a></li>
+            </ul>
+        </nav>
+    </div>
+    <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="myModalLabel article-title"></h4>
+                    <div class="article-item"><span>发布时间：</span><span class="article-date" id="article-time"></span><span style="padding: 0 0 0 40px;">作者：</span> <span class="article-author" id="article-author"></span></div>
+                </div>
+                <div class="modal-body">
+                    <div class="article-content" id="article-content"></div>
+                </div>
             </div>
         </div>
     </div>
+
 </body>
+<script type="text/template" id="article">
+    <div class="media" data-toggle="modal" data-target="#myModal" data-index="{{= index}}">
+        <div class="media-left">
+            <a href="#">
+                <img class="media-object" src="images/demo.svg" alt="...">
+            </a>
+        </div>
+        <div class="media-body">
+            <h4 class="media-heading">{{= title}}</h4>
+            {{= brief}}
+        </div>
+    </div>
+</script>
+
 <script>
-    console.log(<%= login %>);
+    var count = <%= count %>;
+    var dataList = [];
+    (function ($) {
+        $.getUrlParam = function (name) {
+            var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)");
+            var r = window.location.search.substr(1).match(reg);
+            if (r != null) return unescape(r[2]); return null;
+        }
+    })(jQuery);
+    $(function(){
+        getData();
+        $(window).on("hashchange", function() {//兼容ie8+和手机端
+
+            getData();
+        });
+    });
+
+
+    function getData(){
+        var hash = window.location.hash.substring(1);
+        if(!hash){
+            hash = 0
+        }
+        console.log(hash);
+        var page = parseInt(hash);
+        var prePage = page - 1,
+            nextPage = page + 1;
+        $(".previous a").attr("data-page",prePage);
+        $(".next a").attr("data-page",nextPage);
+        $(".previous a").attr("href","#" + prePage);
+        $(".next a").attr("href","#" + nextPage);
+
+        if(page==0){
+            $(".previous").addClass("disabled");
+            $(".previous a").attr("href","javascripr:void(0)");
+            $(".previous").attr("data-page",0);
+        }else{
+            $(".previous").removeClass("disabled");
+        }
+        if(nextPage*3>=count){
+            $(".next").addClass("disabled");
+            $(".next a").attr("href","javascripr:void(0)");
+            $(".next").attr("data-page",page);
+        }else{
+            $(".next").removeClass("disabled");
+        }
+
+        $.post("/getArticle",{"page":page},function(res){
+            dataList = res;
+            console.log(res);
+            $("#articleList").html("");
+            for( i in res){
+                var compiled = _.template($("#article").html());
+                var html = compiled({title:res[i].title,brief:res[i].brief,index:i});
+                $("#articleList").append($(html));
+            }
+        })
+    }
+
+    $('#myModal').on('show.bs.modal', function (event) {
+        var button = $(event.relatedTarget) // Button that triggered the modal
+        var i = button.data('index');
+        console.log(i);
+        var modal = $(this);
+        modal.find("#article-author").text(dataList[i].author)
+        modal.find('.modal-title').text(dataList[i].title);
+        modal.find('#article-time').text(dataList[i].time);
+        modal.find('.article-content').html(dataList[i].content);
+    })
+
 </script>
 </html>
