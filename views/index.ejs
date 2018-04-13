@@ -7,6 +7,7 @@
     <title>首页</title>
 
     <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link href="css/index.css" rel="stylesheet">
     <script src="js/jquery.min.js"></script>
     <script src="js/underscore.js"></script>
     <script src="js/bootstrap.min.js"></script>
@@ -29,7 +30,7 @@
             <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
                 <ul class="nav navbar-nav">
                     <li class="active"><a href="/">首页 <span class="sr-only">(current)</span></a></li>
-                    <li><a href="#">Link</a></li>
+                    <li><a href="/editor">发布说说</a></li>
 
                 </ul>
                 <% if(login){ %>
@@ -50,6 +51,7 @@
     <div class="container" id="articleList">
 
     </div>
+
     <div class="container">
         <nav aria-label="Page navigation">
             <ul class="pager">
@@ -108,6 +110,7 @@
 
 
     function getData(){
+        showLoading("#articleList","show")
         var hash = window.location.hash.substring(1);
         if(!hash){
             hash = 0

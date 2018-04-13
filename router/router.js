@@ -7,18 +7,21 @@ var db = require("../models/db.js");
 var path = require('path');
 var fs = require('fs');
 var util = require('util');
-var os=require('os'),
-    iptable={},
-    ifaces=os.networkInterfaces();
-for (var dev in ifaces) {
-    ifaces[dev].forEach(function(details,alias){
-        if (details.family=='IPv4') {
-            iptable[dev+(alias?':'+alias:'')]=details.address;
+var os=require('os');
+function getIPAdress(){
+    var interfaces = os.networkInterfaces();
+    for(var devName in interfaces){
+        var iface = interfaces[devName];
+        for(var i=0;i<iface.length;i++){
+            var alias = iface[i];
+            if(alias.family === 'IPv4' && alias.address !== '127.0.0.1' && !alias.internal){
+                return alias.address;
+            }
         }
-    });
+    }
 }
 
-console.log(iptable);
+console.log(getIPAdress());
 Date.prototype.Format = function (fmt) { //author: meizz
     var o = {
         "M+": this.getMonth() + 1, //月份
@@ -191,9 +194,11 @@ exports.uploadImg = function (req,res,next) {
     //图片上传临时缓存地址
     form.uploadDir=__dirname.replace("router","public") + '/uploads';
 
-
+    var ip = getIPAdress();
     //返回图片地址路径
-    var assitUrl = 'http://'+iptable["以太网:1"]+':3000/uploads';
+    var assitUrl = 'http://'+ip+':3000/uploads';
+
+
 
     form.parse(req, function (err, fields, files) {
         if (err) {

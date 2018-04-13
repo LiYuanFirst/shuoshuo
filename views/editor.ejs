@@ -7,9 +7,23 @@
     <title>首页</title>
 
     <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link href="css/index.css" rel="stylesheet">
     <script src="js/jquery.min.js"></script>
     <script src="js/bootstrap.min.js"></script>
-
+    <style>
+        .loader-con{
+            position: absolute;
+            top:0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255,255,255,.6);
+            z-index: 20000;
+        }
+        .loader{
+            z-index: 20000;
+        }
+    </style>
 </head>
 <body>
     <nav class="navbar navbar-inverse">
@@ -28,8 +42,8 @@
             <!-- Collect the nav links, forms, and other content for toggling -->
             <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
                 <ul class="nav navbar-nav">
-                    <li class="active"><a href="/">首页 <span class="sr-only">(current)</span></a></li>
-                    <li><a href="#">Link</a></li>
+                    <li><a href="/">首页 <span class="sr-only">(current)</span></a></li>
+                    <li class="active"><a href="/editor">发布说说</a></li>
 
                 </ul>
                 <% if(login){ %>
@@ -47,7 +61,7 @@
             </div><!-- /.navbar-collapse -->
         </div><!-- /.container-fluid -->
     </nav>
-    <div class="container">
+    <div class="container" id="con">
         <div class="input-group input-group-lg" style="margin-bottom:16px;">
           <span class="input-group-addon" id="sizing-addon1">标题</span>
           <input type="text" class="form-control" placeholder="请输入标题" aria-describedby="sizing-addon1" id="editor-title">
